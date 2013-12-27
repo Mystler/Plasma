@@ -74,12 +74,7 @@ static char* glueFile = (char*)kGlueFile;
 void WritePythonFile(const plFileName &fileName, const plFileName &path, hsStream *s)
 {
     hsUNIXStream pyStream, glueStream;
-    plFileName filePath;
-    size_t filestart = fileName.AsString().FindLast('.');
-    if (filestart >= 0)
-        filePath = fileName.AsString().Substr(filestart+1);
-    else
-        filePath = fileName;
+    plFileName filePath = fileName.StripFileExt();
     filePath = plFileName::Join(path, filePath + ".py");
 
     if (!pyStream.Open(filePath) || !glueStream.Open(glueFile))
