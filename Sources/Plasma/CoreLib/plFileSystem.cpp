@@ -563,7 +563,7 @@ plFileName plFileSystem::GetTempFilename(const char *prefix, const plFileName &p
     size_t temp_len = tmpdir.GetSize() + strlen(prefix) + 7;
     char *temp = new char[temp_len + 1];
     snprintf(temp, temp_len + 1, "%s/%sXXXXXX", tmpdir.AsString().c_str(), prefix);
-    mktemp(temp);
+    mkstemp(temp);
     plFileName result = temp;
     delete [] temp;
 
