@@ -45,6 +45,7 @@ find_package(Ogg REQUIRED)    #TODO: Not required if we aren't building the clie
 find_package(Vorbis REQUIRED) #TODO: Not required if we aren't building the client
 find_package(Speex REQUIRED)  #TODO: Not required if we aren't building the client
 find_package(CURL REQUIRED)
+find_package(CARES)
 
 if(WIN32)
     find_package(PhysX REQUIRED)  #TODO: Not required if we aren't building the client
@@ -62,6 +63,12 @@ option(CURL_IS_STATIC "Using the static version of libcurl?" ON)
 if(CURL_IS_STATIC)
     add_definitions(-DCURL_STATICLIB)
 endif(CURL_IS_STATIC)
+
+# same thing for c-ares
+option(CARES_IS_STATIC "Using the static version of c-ares?" ON)
+if(CARES_IS_STATIC)
+    add_definitions(-DCARES_STATICLIB)
+endif(CARES_IS_STATIC)
 
 option(PLASMA_EXTERNAL_RELEASE "Is this release intended for the general public?" OFF)
 if(PLASMA_EXTERNAL_RELEASE)
