@@ -8,6 +8,7 @@ if(WIN32)
 endif(WIN32)
 include_directories(${OPENAL_INCLUDE_DIR})
 include_directories(${Speex_INCLUDE_DIR})
+include_directories(${Opus_INCLUDE_DIR})
 
 set(plAudio_SOURCES
     plAudioCaps.cpp
@@ -15,6 +16,7 @@ set(plAudio_SOURCES
     plDSoundBuffer.cpp
     plEAXEffects.cpp
     plEAXListenerMod.cpp
+    plOpus.cpp
     plSound.cpp
     plSoundEvent.cpp
     plVoiceChat.cpp
@@ -33,6 +35,7 @@ set(plAudio_HEADERS
     plDSoundBuffer.h
     plEAXEffects.h
     plEAXListenerMod.h
+    plOpus.h
     plSound.h
     plSoundEvent.h
     plVoiceChat.h

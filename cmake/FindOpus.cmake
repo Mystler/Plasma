@@ -13,13 +13,21 @@ find_library(Opus_LIBRARY NAMES opus
 find_library(Celt_LIBRARY NAMES celt
              PATHS /usr/local/lib /usr/lib)
 
-find_library(Silk_LIBRARY NAMES silk_common
+find_library(Silk_COMMON_LIBRARY NAMES silk_common
+             PATHS /usr/local/lib /usr/lib)
+
+find_library(Silk_FIXED_LIBRARY NAMES silk_fixed
+             PATHS /usr/local/lib /usr/lib)
+
+find_library(Silk_FLOAT_LIBRARY NAMES silk_float
              PATHS /usr/local/lib /usr/lib)
 
 set(Opus_LIBRARIES
     ${Opus_LIBRARY}
     ${Celt_LIBRARY}
-    ${Silk_LIBRARY}
+    ${Silk_COMMON_LIBRARY}
+    ${Silk_FIXED_LIBRARY}
+    ${Silk_FLOAT_LIBRARY}
 )
 
 if(Opus_INCLUDE_DIR AND Opus_LIBRARY)
