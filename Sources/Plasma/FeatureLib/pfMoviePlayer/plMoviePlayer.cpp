@@ -47,7 +47,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #   include <vpx/vpx_decoder.h>
 #   include <vpx/vp8dx.h>
 #   define iface (vpx_codec_vp9_dx())
-#   include <opus.h>
+#   include "plAudio/plOpus.h"
 
 #   define WEBM_CODECID_VP9 "V_VP9"
 #   define WEBM_CODECID_OPUS "A_OPUS"
@@ -257,33 +257,27 @@ bool plMoviePlayer::ILoadAudio()
         plStatusLog::AddLineS("movie.log", "%s: Not an Opus audio track!", fMoviePath.AsString().c_str());
         return false;
     }
-    int error;
-    OpusDecoder* opus = opus_decoder_create(48000, audio->GetChannels(), &error);
-    if (error != OPUS_OK)
-        hsAssert(false, "Error occured initalizing opus");
+    std::unique_ptr<plOpus> opus(plOpus::Create(plOpus::kFullband, audio->GetChannels(), plOpus::kAudio));
 
     // Decode audio track
     std::vector<blkbuf_t> frames;
     fAudioTrack->GetFrames(fReader, fSegment->GetDuration(), frames);
-    static const int maxFrameSize = 5760; // for max packet duration at 48kHz
     std::vector<int16_t> decoded;
-    decoded.reserve(frames.size() * audio->GetChannels() * maxFrameSize);
+    decoded.reserve(frames.size() * opus->DecoderFrameSize());
 
-    int16_t* frameData = new int16_t[maxFrameSize * audio->GetChannels()];
+    int16_t* frameData = new int16_t[opus->DecoderFrameSize()];
     for (const auto& frame : frames) {
         const std::unique_ptr<uint8_t>& buf = std::get<0>(frame);
         int32_t size = std::get<1>(frame);
 
-        int samples = opus_decode(opus, buf.get(), size, frameData, maxFrameSize, 0);
-        if (samples < 0)
-            hsAssert(false, "opus error");
-        for (size_t i = 0; i < samples * audio->GetChannels(); i++)
+        int32_t len = opus->DecodeFrame(buf.get(), size, frameData);
+        hsAssert(len >= 0, "Opus Error:" opus_strerror(len));
+        for (size_t i = 0; i < len; i++)
             decoded.push_back(frameData[i]);
     }
     delete[] frameData;
 
     fAudioSound->FillSoundBuffer(reinterpret_cast<uint8_t*>(decoded.data()), decoded.size() * sizeof(int16_t));
-    opus_decoder_destroy(opus);
     return true;
 #else
     return false;
