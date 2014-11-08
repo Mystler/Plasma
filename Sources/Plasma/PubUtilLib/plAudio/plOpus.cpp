@@ -43,6 +43,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plOpus.h"
 
 #include <opus.h>
+#include "hsStream.h"
 
 plOpus::~plOpus()
 {
@@ -76,9 +77,69 @@ plOpus* plOpus::Create(Mode mode, int channels, Application application)
     return opus;
 }
 
+int32_t plOpus::EncodeStream(const int16_t* data, int32_t numFrames, hsRAMStream* out) const
+{
+    int32_t packedLength = 0;
+    size_t maxFrameSize = EncoderFrameSize();
+    size_t maxFrameBytes = maxFrameSize * sizeof(int16_t);
+    int16_t* pData = const_cast<int16_t*>(data);
+    int32_t encFrameLength;
+    uint8_t* encFrameData = new uint8_t[maxFrameBytes];
+
+    for (size_t i = 0; i < numFrames; i++) {
+        encFrameLength = EncodeFrame(pData, maxFrameBytes, encFrameData);
+        if (encFrameLength < 0) {
+            hsAssert(false, "Opus Encoder Error:" opus_strerror(frameLength));
+            break;
+        }
+
+        out->WriteLE(encFrameLength);
+        packedLength += sizeof(encFrameLength);
+        out->Write(encFrameLength, encFrameData);
+        packedLength += encFrameLength;
+        pData += maxFrameSize;
+    }
+
+    delete[] encFrameData;
+    return packedLength;
+}
+
 inline int32_t plOpus::EncodeFrame(const int16_t* data, int32_t outSize, uint8_t* out) const
 {
     return opus_encode(fEncoder, data, EncoderFrameSamples(), out, outSize);
+}
+
+int32_t plOpus::DecodeStream(const uint8_t* data, int32_t size, int32_t numFrames, int16_t* out) const
+{
+    int32_t outLength = 0;
+    size_t maxFrameSize = DecoderFrameSize();
+    size_t maxFrameBytes = maxFrameSize * sizeof(int16_t);
+    int16_t* pOut = out;
+    hsReadOnlyStream stream(size, data);
+    int32_t decFrameLen;
+    int16_t* decFrameData = new int16_t[maxFrameSize];
+    int32_t encFrameLen;
+    uint8_t* encFrameData = new uint8_t[maxFrameBytes];
+
+    for (size_t i = 0; i < numFrames; i++) {
+        stream.ReadLE(&encFrameLen);
+        stream.Read(encFrameLen, encFrameData);
+
+        decFrameLen = DecodeFrame(encFrameData, encFrameLen, decFrameData);
+        if (decFrameLen < 0) {
+            hsAssert(false, "Opus Decoder Error:" opus_strerror(decFrameLen));
+            break;
+        }
+
+        for (size_t j = 0; j < decFrameLen; j++)
+            pOut[j] = decFrameData[j];
+        outLength += decFrameLen;
+        pOut += decFrameLen;
+    }
+
+    delete[] encFrameData;
+    delete[] decFrameData;
+    return outLength;
 }
 
 int32_t plOpus::DecodeFrame(const uint8_t* data, int32_t size, int16_t* out) const

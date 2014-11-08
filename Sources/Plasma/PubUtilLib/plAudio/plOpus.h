@@ -74,6 +74,19 @@ public:
       */
     static plOpus* Create(Mode mode, int channels, Application application);
 
+    /** Encodes an uncompressed audio stream into numFrames that will be
+      * written to the output hsRAMStream. This function is working like
+      * its equivalent in the plSpeex class, with usage in plVoiceChat in mind.
+      * The stream has to be decoded with DecodeStream().
+      * @param [in] data The uncompressed audio buffer which can be split into
+      *  numFrames of 16-bit EncoderFrameSize() length.
+      * @param [in] numFrames Determines into how many frames the input will be
+      *  split.
+      * @param [out] out Encoded frames will be written to this hsRAMStream.
+      * @returns Number of bytes added the output stream.
+      */
+    int32_t EncodeStream(const int16_t* data, int32_t numFrames, class hsRAMStream* out) const;
+
     /** Encodes an uncompressed audio frame into the given out vector.
       * @param [in] data The audio frame buffer. Length must be
       *  EncoderFrameSize() 16-bit integers.
@@ -83,6 +96,18 @@ public:
       *  something went wrong.
       */
     int32_t EncodeFrame(const int16_t* data, int32_t outSize, uint8_t* out) const;
+
+    /** Decodes an encoded opus stream with numFrames into an output buffer.
+      * This function is working like its equivalent in the plSpeex class,
+      * with usage in plVoiceChat in mind. The stream has to be encoded with
+      * EncodeStream().
+      * @param [in] data The encoded opus audio stream buffer.
+      * @param [in] size Number of bytes in the data stream buffer.
+      * @param [in] numFrames Number of frames in the stream buffer.
+      * @param [out] out Decoded frames will be written to this buffer.
+      * @returns Number of elements added to the output buffer.
+      */
+    int32_t DecodeStream(const uint8_t* data, int32_t size, int32_t numFrames, int16_t* out) const;
 
     /** Decodes an Opus frame into the given out vector.
       * @param [in] data The Opus frame buffer
