@@ -362,11 +362,9 @@ class xTakableClothing(ptModifier):
         wornnamelist = [i[0] for i in worn]
         changeGuildShirt = False
         if base.find('Torso_GuildBlue') != -1 or base.find('Torso_GuildGreen') != -1 or base.find('Torso_GuildRed') != -1 or base.find('Torso_GuildYellow') != -1 or base.find('Torso_GuildWhite') !=  -1:
-            for guildShirt in guildSDLValues.keys():
-                if guildShirt in wornnamelist:
-                    PtDebugPrint(f"xTakableClothing: Found worn guild short, enforcing swap", level=kWarningLevel)
-                    changeGuildShirt = True
-                    break
+            changeGuildShirt = any((guildShirt in wornnamelist for guildShirt in guildSDLValues))
+            if changeGuildShirt:
+                    PtDebugPrint("xTakableClothing: Found worn guild short, enforcing swap", level=kWarningLevel)
             self.IRemoveOtherGuildShirt()
             psnlSDL = xPsnlVaultSDL()
             psnlSDL["guildAlliance"] = (guildSDLValues[base],)
