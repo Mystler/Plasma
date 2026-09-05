@@ -526,11 +526,11 @@ void plStatusLog::IPrintLineToFile(const ST::string& line)
         {
             if ( fFlags & kTimestamp )
             {
-                buf << '(' << plUnifiedTime::GetCurrent(plUnifiedTime::kLocal).Format("%m/%d %H:%M:%S") << ") ";
+                buf << '(' << plUnifiedTime::GetCurrent(plUnifiedTime::kLocal).Format("%Y-%m-%d %H:%M:%S") << ") ";
             }
             if ( fFlags & kTimestampGMT )
             {
-                buf << '(' << plUnifiedTime::GetCurrent().Format("%m/%d %H:%M:%S UTC") << ") ";
+                buf << '(' << plUnifiedTime::GetCurrent().Format("%Y-%m-%d %H:%M:%S UTC") << ") ";
             }
             if ( fFlags & kTimeInSeconds )
             {
