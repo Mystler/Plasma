@@ -107,6 +107,7 @@ kFirstPersonEnableTime = 0.5
 
 pelletCaveGUID = None
 
+kDebugTimerStartIdx = 1000
 
 class xLinkingBookGUIPopup(ptModifier):
     "The Linking Book GUI Popup python code"
@@ -1013,6 +1014,17 @@ class xLinkingBookGUIPopup(ptModifier):
             cam = ptCamera()
             cam.enableFirstPersonOverride()
 
+        # Debug Timers for our backdoor
+        elif id >= kDebugTimerStartIdx:
+            self.HideBook(0)
+            bkIdx = id - kDebugTimerStartIdx
+            defs = [x for x in xLinkingBookDefs.xAgeLinkingBooks]
+            age = defs[bkIdx]
+            TargetAge.value = age
+            global stringAgeRequested
+            stringAgeRequested = age
+            self.IShowBookNoTreasure()
+            PtSaveScreenShot(f"{age}.jpg", PtGetDesktopWidth(), PtGetDesktopHeight())
 
     def GetOwnedAgeLink(self, age):
         vault = ptAgeVault()
@@ -1204,4 +1216,8 @@ class xLinkingBookGUIPopup(ptModifier):
         linkMgr = ptNetLinkingMgr()
         linkMgr.linkToAge(als)
 
-
+    def OnBackdoorMsg(self, target, param):
+        if target == "xlinkingbookgui" and param == "debugall":
+            # Start 1s interval timers to show every linking book and take a screenshot of it
+            for idx, age in enumerate(xLinkingBookDefs.xAgeLinkingBooks):
+                PtAtTimeCallback(self.key, 1 + idx, kDebugTimerStartIdx + idx)
