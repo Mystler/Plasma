@@ -63,8 +63,8 @@ from PlasmaKITypes import *
 from PlasmaNetConstants import *
 import xLinkingBookDefs
 from xPsnlVaultSDL import *
-import time
 import re
+from contextlib import contextmanager
 
 
 # define the attributes that will be entered in max
@@ -1020,10 +1020,8 @@ class xLinkingBookGUIPopup(ptModifier):
             bkIdx = id - kDebugTimerStartIdx
             defs = [x for x in xLinkingBookDefs.xAgeLinkingBooks]
             age = defs[bkIdx]
-            TargetAge.value = age
-            global stringAgeRequested
-            stringAgeRequested = age
-            self.IShowBookNoTreasure()
+            with self.OverrideTargetAge(age):
+                self.IShowBookNoTreasure()
             PtSaveScreenShot(f"{age}.jpg", PtGetDesktopWidth(), PtGetDesktopHeight())
 
     def GetOwnedAgeLink(self, age):
@@ -1219,5 +1217,17 @@ class xLinkingBookGUIPopup(ptModifier):
     def OnBackdoorMsg(self, target, param):
         if target == "xlinkingbookgui" and param == "debugall":
             # Start 1s interval timers to show every linking book and take a screenshot of it
+            # FIXME: Note that this will trigger on every linking book PFM in the age, which is not ideal but nothing we can easily fix right now.
+            # Recommended to not run this while in an age with multiple instances of this script.
             for idx, age in enumerate(xLinkingBookDefs.xAgeLinkingBooks):
                 PtAtTimeCallback(self.key, 1 + idx, kDebugTimerStartIdx + idx)
+
+    @contextmanager
+    def OverrideTargetAge(self, age: str):
+        global stringAgeRequested
+        prevTarget, prevRequested = TargetAge.value, stringAgeRequested
+        TargetAge.value, stringAgeRequested = age, age
+        try:
+            yield
+        finally:
+            TargetAge.value, stringAgeRequested = prevTarget, prevRequested
