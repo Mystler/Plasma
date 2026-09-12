@@ -1025,19 +1025,18 @@ class xLinkingBookGUIPopup(ptModifier):
                 age = defs[bkIdx]
                 if id % 2 == 0:
                     # Show book on even timers.
-                    self.HideBook(0)
                     PtDebugPrint(f"xLinkPanelGUIPopup Showing Debug Panel for {age}")
                     with self.OverrideTargetAge(age):
                         self.IShowBookNoTreasure()
                 else:
                     # Take screenshot on odd timers.
                     PtSaveScreenShot(f"{age}.jpg", PtGetDesktopWidth(), PtGetDesktopHeight())
+                    self.HideBook(0)
             finally:
                 # Start new timer unless we're done.
                 if id < kDebugTimerStartIdx + len(xLinkingBookDefs.xAgeLinkingBooks) * 2 - 1:
                     PtAtTimeCallback(self.key, 0.5, id + 1)
                 else:
-                    self.HideBook(0)
                     PtSendKIMessage(kKIShowMiniKI, 0)
                     PtSendKIMessage(kKILocalChatStatusMsg, "Done! Screenshots have been saved to the client folder.")
 
