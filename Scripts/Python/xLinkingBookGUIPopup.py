@@ -1028,10 +1028,12 @@ class xLinkingBookGUIPopup(ptModifier):
                     PtDebugPrint(f"xLinkPanelGUIPopup Showing Debug Panel for {age}")
                     with self.OverrideTargetAge(age):
                         self.IShowBookNoTreasure()
+                    PtGUICursorOff()
                 else:
                     # Take screenshot on odd timers.
                     PtSaveScreenShot(f"{age}.jpg", PtGetDesktopWidth(), PtGetDesktopHeight())
                     self.HideBook(0)
+                    PtGUICursorOn()
             finally:
                 # Start new timer unless we're done.
                 if id < kDebugTimerStartIdx + len(xLinkingBookDefs.xAgeLinkingBooks) * 2 - 1:
